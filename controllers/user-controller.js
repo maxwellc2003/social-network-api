@@ -53,7 +53,7 @@ const userController = {
     })
       .then((dbUserData) => {
         if (!dbUserData) {
-          res.status(404).json({ message: "No pizza found with this id!" });
+          res.status(404).json({ message: "No user found with this id!" });
           return;
         }
         res.json(dbUserData);
@@ -66,7 +66,7 @@ const userController = {
     User.findOneAndDelete({ _id: params.id })
       .then((dbUserData) => {
         if (!dbUserData) {
-          res.status(404).json({ message: "No pizza found with this id!" });
+          res.status(404).json({ message: "No user found with this id!" });
           return;
         }
         res.json(dbUserData);

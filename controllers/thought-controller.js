@@ -27,7 +27,7 @@ const thoughtController = {
       .select("-__v")
       .then((dbUserData) => {
         if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id!" });
+          res.status(404).json({ message: "No thought found with this id!" });
           return;
         }
         res.json(dbUserData);
@@ -44,24 +44,23 @@ const thoughtController = {
       new: true,
       runValidators: true,
     })
-      .then((dbUserData) => {
-        if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id!" });
+      .then((thoughtData) => {
+        if (!thoughtData) {
+          res.status(404).json({ message: "No thought found with this id!" });
           return;
         }
-        res.json(dbUserData);
+        res.json(thoughtData);
       })
       .catch((err) => res.status(400).json(err));
   },
 
   // add a thought
   addThought({ params, body }, res) {
-    console.log(body);
     Thought.create(body)
-      .then(({ _id }) => {
+      .then((thoughtData) => {
         return User.findOneAndUpdate(
-          { _id: params.userid },
-          { $push: { thoughts: _id } },
+          { _id: body.userId },
+          { $push: { thoughts: thoughtData._id } },
           { new: true }
         );
       })
@@ -70,7 +69,7 @@ const thoughtController = {
           res.status(404).json({ message: "No user found with this id!" });
           return;
         }
-        res.json(dbUserData);
+        res.json(body);
       })
       .catch((err) => res.json(err));
   },
@@ -78,52 +77,42 @@ const thoughtController = {
   // add reaction to a comment
   addReaction({ params, body }, res) {
     Thought.findOneAndUpdate(
-      { _id: params.thoughtid },
-      { $push: { replies: body } },
+      { _id: params.thoughtId },
+      { $push: { reactions: body } },
       { new: true }
     )
-      .then((dbUserData) => {
-        if (!dbUserData) {
+      .then((thoughtData) => {
+        if (!thoughtData) {
           res.status(404).json({ message: "No user found with this id!" });
           return;
         }
-        res.json(dbUserData);
+        res.json(thoughtData);
       })
       .catch((err) => res.json(err));
   },
 
   // remove reaction from comment
-  removeReaction({ params }, res) {
+  removeReaction({ params, body }, res) {
     Thought.findOneAndUpdate(
-      { _id: params.thoughtid },
-      { $pull: { replies: { replyId: params.replyId } } },
+      { _id: params.thoughtId },
+      { $pull: { reactions: { _id: body.reactionId } } },
       { new: true }
     )
-      .then((dbUserData) => res.json(dbUserData))
+      .then((thoughtData) => res.json(thoughtData))
       .catch((err) => res.json(err));
   },
 
   // delete a thought
   removeThought({ params }, res) {
-    Thought.findOneAndDelete({ _id: params.thoughtid })
-      .then((deletedThought) => {
-        if (!deletedThought) {
-          return res.status(404).json({ message: "No thought with this id!" });
-        }
-        return User.findOneAndUpdate(
-          { _id: params.userid },
-          { $pull: { thought: params.thoughtid } },
-          { new: true }
-        );
-      })
-      .then((dbUserData) => {
-        if (!dbUserData) {
+    Thought.findOneAndDelete({ _id: params.id })
+      .then((thoughtData) => {
+        if (!thoughtData) {
           res.status(404).json({ message: "No user found with this id!" });
           return;
         }
-        res.json(dbUserData);
+        res.json(thoughtData);
       })
-      .catch((err) => res.json(err));
+      .catch((err) => res.status(400).json(err));
   },
 };
 
